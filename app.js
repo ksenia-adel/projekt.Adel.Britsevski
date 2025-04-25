@@ -16,16 +16,10 @@ app.use('/api/booking', require('./routes/bookingRoutes'));
 app.use('/api/patient', require('./routes/patientRoutes'));
 app.use('/api/statistic', require('./routes/statisticRoutes'));
 
-
-
-
-
-
 const PORT = process.env.PORT || 3000;
-
 async function start() {
   try {
-    await sequelize.sync({ alter: true }); // только для dev
+    await sequelize.sync({ alter: true });
     app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
   } catch (e) {
     console.error('Server error', e);

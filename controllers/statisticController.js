@@ -9,7 +9,6 @@ exports.getStatistics = async (req, res) => {
     const doctorCount = await Doctor.count();
     const bookingCount = await Booking.count();
     const serviceCount = await ServiceCatalog.count();
-
     // top 3 doctors based on bookings
     const topDoctors = await Booking.findAll({
       attributes: [
@@ -29,10 +28,8 @@ exports.getStatistics = async (req, res) => {
         }
       ],
       group: [
-        'booking.scheduleid',
-        'scheduleSlot.scheduleid',
-        'scheduleSlot.doctor.doctorid',
-        'scheduleSlot.doctor.user.userid'
+        'booking.scheduleid', 'scheduleSlot.scheduleid',
+        'scheduleSlot.doctor.doctorid', 'scheduleSlot.doctor.user.userid'
       ],
       order: [[Sequelize.literal('count'), 'DESC']],
       limit: 3
@@ -57,26 +54,18 @@ exports.getStatistics = async (req, res) => {
       adminid: req.user.userid,
       reportcontent: JSON.stringify({
         total: {
-          patients: patientCount,
-          doctors: doctorCount,
-          bookings: bookingCount,
-          services: serviceCount
+          patients: patientCount, doctors: doctorCount, bookings: bookingCount, services: serviceCount
         },
-        topDoctors,
-        topServices
+        topDoctors, topServices
       })
     });
 
     // return response
     res.json({
       total: {
-        patients: patientCount,
-        doctors: doctorCount,
-        bookings: bookingCount,
-        services: serviceCount
+        patients: patientCount, doctors: doctorCount, bookings: bookingCount, services: serviceCount
       },
-      topDoctors,
-      topServices
+      topDoctors, topServices
     });
   } catch (err) {
     res.status(500).json({ message: 'Failed to get statistics', error: err.message });
@@ -87,10 +76,8 @@ exports.getStatistics = async (req, res) => {
 exports.deleteStatistic = async (req, res) => {
   try {
     const { id } = req.params;
-
     const stat = await Statistic.findByPk(id);
     if (!stat) return res.status(404).json({ message: 'Statistic not found' });
-
     await stat.destroy();
     res.json({ message: 'Statistic deleted successfully' });
   } catch (err) {

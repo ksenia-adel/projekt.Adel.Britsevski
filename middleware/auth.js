@@ -4,14 +4,11 @@ require('dotenv').config();
 // middleware to authenticate user using JWT token
 const auth = (req, res, next) => {
   const authHeader = req.headers.authorization;
-
   // check if token exists in header
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ message: 'No token provided' });
   }
-
   const token = authHeader.split(' ')[1];
-
   try {
     // verify token and decode user info
     const decoded = jwt.verify(token, process.env.JWT_SECRET);

@@ -14,33 +14,19 @@ exports.createDoctor = async (req, res) => {
   try {
     const { firstname, lastname, email, phone, specialty } = req.body;
     const adminId = req.user.userid; // admin who creates this doctor
-
     const rawPassword = generatePassword(); // plain password
     const hashedPassword = await bcrypt.hash(rawPassword, 10); // hashed password
-
     const user = await User.create({
       email,
       password: hashedPassword,
       role: 'doctor'
     });
-
     const doctor = await Doctor.create({
-      firstname,
-      lastname,
-      email,
-      phone,
-      specialty,
-      userid: user.userid,
-      adminid: adminId
+      firstname, lastname, email, phone, specialty, userid: user.userid, adminid: adminId
     });
-
     // return credentials (not recommended for production)
     res.status(201).json({
-      message: 'Doctor created successfully',
-      doctor,
-      login: {
-        email,
-        password: rawPassword
+      message: 'Doctor created successfully', doctor, login: { email, password: rawPassword
       }
     });
   } catch (err) {
@@ -63,9 +49,7 @@ exports.updateDoctor = async (req, res) => {
   try {
     const doctor = await Doctor.findByPk(id);
     if (!doctor) return res.status(404).json({ message: 'Doctor not found' });
-
     await doctor.update({ firstname, lastname, email, phone, specialty });
-
     const user = await User.findByPk(doctor.userid);
     if (user) {
       await user.update({ email }); // optionally update more fields
@@ -85,7 +69,6 @@ exports.deleteDoctor = async (req, res) => {
   try {
     const doctor = await Doctor.findByPk(id);
     if (!doctor) return res.status(404).json({ message: 'Doctor not found' });
-
     await User.destroy({ where: { userid: doctor.userid } });
     await Doctor.destroy({ where: { doctorid: id } });
 
@@ -103,7 +86,6 @@ exports.getDoctorBookings = async (req, res) => {
     const doctor = await Doctor.findOne({ where: { userid } });
 
     if (!doctor) return res.status(404).json({ message: 'Doctor not found' });
-
     const bookings = await Booking.findAll({
       include: [
         {

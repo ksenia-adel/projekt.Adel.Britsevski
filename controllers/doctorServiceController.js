@@ -9,13 +9,11 @@ exports.createDoctorService = async (req, res) => {
     // find the doctor by userid
     const doctor = await Doctor.findOne({ where: { userid } });
     if (!doctor) return res.status(404).json({ message: 'Doctor not found for this user' });
-
     const doctorid = doctor.doctorid;
 
     // check if service exists
     const service = await ServiceCatalog.findByPk(servicecatalogid);
     if (!service) return res.status(404).json({ message: 'Service not found' });
-
     // create the link between doctor and service
     const linked = await DoctorService.create({ doctorid, servicecatalogid });
 
@@ -30,7 +28,6 @@ exports.createDoctorService = async (req, res) => {
 exports.getDoctorServices = async (req, res) => {
   try {
     const { doctorid } = req.params;
-
     const services = await DoctorService.findAll({
       where: { doctorid },
       include: [ServiceCatalog] // include detailed service info
@@ -48,11 +45,9 @@ exports.deleteDoctorService = async (req, res) => {
   try {
     const { id } = req.params;
     const userid = req.user.userid;
-
-    // find doctor by userid
+    // find doctr by userid
     const doctor = await Doctor.findOne({ where: { userid } });
     if (!doctor) return res.status(404).json({ message: 'Doctor not found' });
-
     const doctorid = doctor.doctorid;
 
     // find doctor-service link by ID
@@ -63,7 +58,6 @@ exports.deleteDoctorService = async (req, res) => {
     if (service.doctorid !== doctorid) {
       return res.status(403).json({ message: 'Access denied. This service does not belong to you.' });
     }
-
     await service.destroy();
     res.json({ message: 'Doctor service unlinked successfully' });
 

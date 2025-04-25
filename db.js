@@ -2,15 +2,15 @@ const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
 const sequelize = new Sequelize(
-  process.env.DB_DATABASE,  // название БД
-  process.env.DB_USER,      // пользователь
-  process.env.DB_PASSWORD,  // пароль
+  process.env.DB_DATABASE,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
   {
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
     dialect: process.env.DB_DIALECT || 'postgres',
-    schema: process.env.DB_SCHEMA || 'onlinedoc', // если используешь SCHEMA
-    logging: false, // отключает лишние логи
+    schema: process.env.DB_SCHEMA || 'onlinedoc',
+    logging: false,
   }
 );
 
