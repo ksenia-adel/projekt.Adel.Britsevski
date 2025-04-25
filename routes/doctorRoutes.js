@@ -9,4 +9,6 @@ router.get('/', auth, controller.getAllDoctors);
 router.put('/:id', auth, permit('admin'), controller.updateDoctor);
 router.delete('/:id', auth, permit('admin'), controller.deleteDoctor);
 
+router.get('/bookings', auth, permit('doctor'), controller.getDoctorBookings);
+
 module.exports = router;

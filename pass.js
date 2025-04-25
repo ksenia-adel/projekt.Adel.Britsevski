@@ -1,2 +1,2 @@
 const bcrypt = require('bcrypt');
-bcrypt.hash('supersecurepassword', 10).then(console.log);
+bcrypt.hash('doc1', 10).then(console.log);

@@ -1,4 +1,4 @@
-const { Doctor, User } = require('../models');
+const { Doctor, Booking, Schedule, Patient, User, ServiceCatalog } = require('../models');
 const bcrypt = require('bcrypt');
 
 const generatePassword = () => {
@@ -99,5 +99,37 @@ exports.deleteDoctor = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Delete failed', error: err.message });
+  }
+};
+
+
+exports.getDoctorBookings = async (req, res) => {
+  try {
+    const userid = req.user.userid;
+    const doctor = await Doctor.findOne({ where: { userid } });
+
+    if (!doctor) return res.status(404).json({ message: 'Doctor not found' });
+
+    const bookings = await Booking.findAll({
+      include: [
+        {
+          model: Schedule,
+          as: 'scheduleSlot',
+          where: { doctorid: doctor.doctorid }
+        },
+        {
+          model: Patient,
+          include: [{ model: User }]
+        },
+        {
+          model: ServiceCatalog
+        }
+      ],
+      order: [['bookingid', 'DESC']]
+    });
+
+    res.json(bookings);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to load bookings', error: err.message });
   }
 };

@@ -9,6 +9,15 @@ app.use(express.json());
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/doctor', require('./routes/doctorRoutes'));
+app.use('/api/services', require('./routes/serviceRoutes'));
+app.use('/api/doctorservices', require('./routes/doctorServiceRoutes'));
+app.use('/api/schedule', require('./routes/scheduleRoutes'));
+app.use('/api/booking', require('./routes/bookingRoutes'));
+app.use('/api/patient', require('./routes/patientRoutes'));
+
+
+
+
 
 const PORT = process.env.PORT || 3000;
 
