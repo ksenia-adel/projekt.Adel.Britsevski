@@ -94,18 +94,12 @@ exports.getDoctorBookings = async (req, res) => {
     if (!doctor) return res.status(404).json({ message: 'Doctor not found' });
     const bookings = await Booking.findAll({
       include: [
-        {
-          model: Schedule,
+        {model: Schedule,
           as: 'scheduleSlot',
-          where: { doctorid: doctor.doctorid }
-        },
-        {
-          model: Patient,
-          include: [{ model: User }]
-        },
-        {
-          model: ServiceCatalog
-        }
+          where: { doctorid: doctor.doctorid }},
+        {model: Patient,
+          include: [{ model: User }]},
+        {model: ServiceCatalog}
       ],
       order: [['bookingid', 'DESC']]
     });
