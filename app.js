@@ -16,6 +16,8 @@ app.use('/api/booking', require('./routes/bookingRoutes'));
 app.use('/api/patient', require('./routes/patientRoutes'));
 app.use('/api/statistic', require('./routes/statisticRoutes'));
 
+
+
 const PORT = process.env.PORT || 3000;
 async function start() {
   try {

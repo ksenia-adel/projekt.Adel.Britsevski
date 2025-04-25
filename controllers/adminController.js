@@ -13,26 +13,44 @@ const generatePassword = () => {
 exports.createAdmin = async (req, res) => {
   try {
     const { firstname, lastname, email, phone } = req.body;
+
+    // basic validation
+    if (!firstname || !lastname || !email || !phone) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
     // check if user with this email already exists
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
-      return res.status(400).json({ message: 'A user with this email already exists' });
+      return res.status(400).json({ message: 'User with this email already exists' });
     }
+
     const rawPassword = generatePassword(); // generate plain password
     const hashedPassword = await bcrypt.hash(rawPassword, 10); // hash it with bcrypt
+
     // create user entry
     const user = await User.create({
-      email, password: hashedPassword, role: 'admin'
+      email,
+      password: hashedPassword,
+      role: 'admin'
     });
+
     // create admin entry linked with user
     const admin = await Admin.create({
-      firstname, lastname, email, phone, userid: user.userid
+      firstname,
+      lastname,
+      email,
+      phone,
+      userid: user.userid
     });
+
     // return created admin with login info
     res.status(201).json({
-      message: 'Admin created successfully',admin,
+      message: 'Admin created successfully',
+      admin,
       login: {
-        email,password: rawPassword
+        email,
+        password: rawPassword
       }
     });
   } catch (err) {
@@ -42,28 +60,32 @@ exports.createAdmin = async (req, res) => {
 
 // returns list of all admins
 exports.getAllAdmins = async (req, res) => {
-  const admins = await Admin.findAll();
-  res.json(admins);
+  try {
+    const admins = await Admin.findAll();
+    res.json(admins);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to get admins', error: err.message });
+  }
 };
 
 // updates admin info and corresponding user email
 exports.updateAdmin = async (req, res) => {
   const { id } = req.params;
   const { firstname, lastname, email, phone } = req.body;
+
   try {
     const admin = await Admin.findByPk(id);
     if (!admin) return res.status(404).json({ message: 'Admin not found' });
 
     await admin.update({ firstname, lastname, email, phone });
-    // update user's email if it was changed and not taken
+
     const user = await User.findByPk(admin.userid);
-    if (user) {
-      if (user.email !== email) {
-        const duplicate = await User.findOne({ where: { email } });
-        if (duplicate) {
-          return res.status(400).json({ message: 'A user with this email already exists' });
-        }
+    if (user && email) {
+      const duplicate = await User.findOne({ where: { email } });
+      if (duplicate && duplicate.userid !== user.userid) {
+        return res.status(400).json({ message: 'This email is used by another user' });
       }
+
       await user.update({ email });
     }
 
@@ -76,11 +98,14 @@ exports.updateAdmin = async (req, res) => {
 // deletes admin and its linked user
 exports.deleteAdmin = async (req, res) => {
   const { id } = req.params;
+
   try {
     const admin = await Admin.findByPk(id);
     if (!admin) return res.status(404).json({ message: 'Admin not found' });
+
     await Admin.destroy({ where: { adminid: id } });
     await User.destroy({ where: { userid: admin.userid } });
+
     res.json({ message: 'Admin and associated user deleted' });
   } catch (err) {
     res.status(500).json({ message: 'Delete failed', error: err.message });
