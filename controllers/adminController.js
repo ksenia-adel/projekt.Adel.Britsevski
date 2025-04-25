@@ -22,9 +22,7 @@ exports.createAdmin = async (req, res) => {
     const hashedPassword = await bcrypt.hash(rawPassword, 10); // hash it with bcrypt
     // create user entry
     const user = await User.create({
-      email,
-      password: hashedPassword,
-      role: 'admin'
+      email, password: hashedPassword, role: 'admin'
     });
     // create admin entry linked with user
     const admin = await Admin.create({
