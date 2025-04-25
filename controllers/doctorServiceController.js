@@ -4,12 +4,10 @@ const { DoctorService, Doctor, ServiceCatalog } = require('../models');
 exports.getDoctorServicesById = async (req, res) => {
   try {
     const { doctorid } = req.params;
-
     const services = await DoctorService.findAll({
       where: { doctorid },
       include: [ServiceCatalog]
     });
-
     res.json(services);
   } catch (err) {
     console.error(err);
@@ -23,12 +21,10 @@ exports.getMyDoctorServices = async (req, res) => {
     const userid = req.user.userid;
     const doctor = await Doctor.findOne({ where: { userid } });
     if (!doctor) return res.status(404).json({ message: 'Doctor not found' });
-
     const services = await DoctorService.findAll({
       where: { doctorid: doctor.doctorid },
       include: [ServiceCatalog]
     });
-
     res.json(services);
   } catch (err) {
     console.error(err);
@@ -41,21 +37,17 @@ exports.createDoctorService = async (req, res) => {
   try {
     const { servicecatalogid } = req.body;
     const userid = req.user.userid;
-
     const doctor = await Doctor.findOne({ where: { userid } });
     if (!doctor) return res.status(404).json({ message: 'Doctor not found' });
-
     // check for duplicate service entry
     const exists = await DoctorService.findOne({
       where: { doctorid: doctor.doctorid, servicecatalogid }
     });
     if (exists) return res.status(400).json({ message: 'Service already linked to doctor' });
-
     const linked = await DoctorService.create({
       doctorid: doctor.doctorid,
       servicecatalogid
     });
-
     res.status(201).json({ message: 'Service linked to doctor', linked });
   } catch (err) {
     console.error(err);
@@ -68,17 +60,13 @@ exports.deleteDoctorService = async (req, res) => {
   try {
     const { id } = req.params;
     const userid = req.user.userid;
-
     const doctor = await Doctor.findOne({ where: { userid } });
     if (!doctor) return res.status(404).json({ message: 'Doctor not found' });
-
     const service = await DoctorService.findByPk(id);
     if (!service) return res.status(404).json({ message: 'Doctor service not found' });
-
     if (service.doctorid !== doctor.doctorid) {
       return res.status(403).json({ message: 'Access denied. This service does not belong to you.' });
     }
-
     await service.destroy();
     res.json({ message: 'Doctor service unlinked successfully' });
   } catch (err) {
