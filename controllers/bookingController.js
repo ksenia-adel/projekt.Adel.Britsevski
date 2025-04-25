@@ -81,3 +81,32 @@ exports.cancelBooking = async (req, res) => {
     res.status(500).json({ message: 'Failed to cancel booking', error: err.message });
   }
 };
+
+exports.payForBooking = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userid = req.user.userid;
+  
+      const patient = await Patient.findOne({ where: { userid } });
+      if (!patient) return res.status(404).json({ message: 'Patient not found' });
+  
+      const booking = await Booking.findByPk(id);
+      if (!booking) return res.status(404).json({ message: 'Booking not found' });
+  
+      if (booking.patientid !== patient.patientid) {
+        return res.status(403).json({ message: 'You cannot pay for someone else’s booking' });
+      }
+  
+      if (booking.ispaid) {
+        return res.status(400).json({ message: 'Booking already paid' });
+      }
+  
+      await booking.update({ ispaid: true });
+  
+      res.json({ message: 'Booking marked as paid', booking });
+    } catch (err) {
+      res.status(500).json({ message: 'Failed to pay for booking', error: err.message });
+    }
+  };
+  
+  

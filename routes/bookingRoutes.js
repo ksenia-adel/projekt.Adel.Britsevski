@@ -8,4 +8,7 @@ router.post('/', auth, permit('patient'), controller.createBooking);
 router.get('/', auth, permit('patient'), controller.getMyBookings);
 router.delete('/:id', auth, permit('patient'), controller.cancelBooking);
 
+router.put('/:id/pay', auth, permit('patient'), controller.payForBooking);
+
+
 module.exports = router;

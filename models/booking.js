@@ -18,7 +18,12 @@ const Booking = sequelize.define('booking', {
   scheduleid: {
     type: DataTypes.INTEGER,
     allowNull: false
-  }
+  },
+  ispaid: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false
+  }  
 }, {
   tableName: 'booking',
   schema: 'onlinedoc',
