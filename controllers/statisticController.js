@@ -1,13 +1,16 @@
 const { Patient, Doctor, Booking, ServiceCatalog, Schedule, User, Statistic } = require('../models');
 const Sequelize = require('sequelize');
 
+// generate and return statistics report
 exports.getStatistics = async (req, res) => {
   try {
+    // count total entities
     const patientCount = await Patient.count();
     const doctorCount = await Doctor.count();
     const bookingCount = await Booking.count();
     const serviceCount = await ServiceCatalog.count();
 
+    // top 3 doctors based on bookings
     const topDoctors = await Booking.findAll({
       attributes: [
         'scheduleid',
@@ -35,6 +38,7 @@ exports.getStatistics = async (req, res) => {
       limit: 3
     });
 
+    // top 3 most booked services
     const topServices = await Booking.findAll({
       attributes: [
         'servicecatalogid',
@@ -46,6 +50,7 @@ exports.getStatistics = async (req, res) => {
       limit: 3
     });
 
+    // save report to database
     await Statistic.create({
       reporttype: 'summary',
       generateddate: new Date(),
@@ -62,6 +67,7 @@ exports.getStatistics = async (req, res) => {
       })
     });
 
+    // return response
     res.json({
       total: {
         patients: patientCount,
@@ -77,6 +83,7 @@ exports.getStatistics = async (req, res) => {
   }
 };
 
+// delete statistics report by id
 exports.deleteStatistic = async (req, res) => {
   try {
     const { id } = req.params;

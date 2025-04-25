@@ -6,7 +6,7 @@ const ServiceCatalog = sequelize.define('servicecatalog', {
   servicecatalogid: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   name: { type: DataTypes.STRING, allowNull: false },
   description: DataTypes.TEXT,
-  duration: { type: DataTypes.INTEGER }, // в минутах
+  duration: { type: DataTypes.INTEGER }, // in minutes
   price: { type: DataTypes.FLOAT },
 }, {
   tableName: 'servicecatalog',

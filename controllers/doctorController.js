@@ -1,6 +1,7 @@
 const { Doctor, Booking, Schedule, Patient, User, ServiceCatalog } = require('../models');
 const bcrypt = require('bcrypt');
 
+// generates a random password for the doctor
 const generatePassword = () => {
   const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   return Array.from({ length: 10 }, () =>
@@ -8,23 +9,21 @@ const generatePassword = () => {
   ).join('');
 };
 
+// creates a doctor and associated user
 exports.createDoctor = async (req, res) => {
   try {
     const { firstname, lastname, email, phone, specialty } = req.body;
-    const adminId = req.user.userid;
+    const adminId = req.user.userid; // admin who creates this doctor
 
-    // 1. Генерируем пароль
-    const rawPassword = generatePassword();
-    const hashedPassword = await bcrypt.hash(rawPassword, 10);
+    const rawPassword = generatePassword(); // plain password
+    const hashedPassword = await bcrypt.hash(rawPassword, 10); // hashed password
 
-    // 2. Создаём пользователя
     const user = await User.create({
       email,
       password: hashedPassword,
       role: 'doctor'
     });
 
-    // 3. Создаём доктора
     const doctor = await Doctor.create({
       firstname,
       lastname,
@@ -35,7 +34,7 @@ exports.createDoctor = async (req, res) => {
       adminid: adminId
     });
 
-    // 4. Возвращаем данные + пароль (в идеале не логинить в проде)
+    // return credentials (not recommended for production)
     res.status(201).json({
       message: 'Doctor created successfully',
       doctor,
@@ -50,13 +49,13 @@ exports.createDoctor = async (req, res) => {
   }
 };
 
-
-
+// returns all doctors (open to all roles)
 exports.getAllDoctors = async (req, res) => {
   const doctors = await Doctor.findAll();
   res.json(doctors);
 };
 
+// updates doctor info and user email
 exports.updateDoctor = async (req, res) => {
   const { id } = req.params;
   const { firstname, lastname, email, phone, specialty } = req.body;
@@ -65,13 +64,11 @@ exports.updateDoctor = async (req, res) => {
     const doctor = await Doctor.findByPk(id);
     if (!doctor) return res.status(404).json({ message: 'Doctor not found' });
 
-    // Обновляем таблицу doctor
     await doctor.update({ firstname, lastname, email, phone, specialty });
 
-    // Обновляем связанного user
     const user = await User.findByPk(doctor.userid);
     if (user) {
-      await user.update({ email }); // можно добавить другие поля, если хочешь
+      await user.update({ email }); // optionally update more fields
     }
 
     res.json({ message: 'Doctor updated', doctor });
@@ -81,7 +78,7 @@ exports.updateDoctor = async (req, res) => {
   }
 };
 
-
+// deletes doctor and associated user
 exports.deleteDoctor = async (req, res) => {
   const { id } = req.params;
 
@@ -89,10 +86,7 @@ exports.deleteDoctor = async (req, res) => {
     const doctor = await Doctor.findByPk(id);
     if (!doctor) return res.status(404).json({ message: 'Doctor not found' });
 
-    // Удаляем user
     await User.destroy({ where: { userid: doctor.userid } });
-
-    // Удаляем doctor
     await Doctor.destroy({ where: { doctorid: id } });
 
     res.json({ message: 'Doctor and associated user deleted' });
@@ -102,7 +96,7 @@ exports.deleteDoctor = async (req, res) => {
   }
 };
 
-
+// gets all bookings for the logged-in doctor
 exports.getDoctorBookings = async (req, res) => {
   try {
     const userid = req.user.userid;

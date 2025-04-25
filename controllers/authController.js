@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
+// registers a new patient user
 exports.register = async (req, res) => {
   const {
     email,
@@ -15,17 +16,17 @@ exports.register = async (req, res) => {
   } = req.body;
 
   try {
-    // Проверка на существование пользователя
+    // check if user with this email already exists
     const existing = await User.findOne({ where: { email } });
     if (existing) return res.status(400).json({ message: 'User already exists' });
 
-    // Хешируем пароль
+    // hash password
     const hash = await bcrypt.hash(password, 10);
 
-    // Создаём user с ролью patient
+    // create user with role 'patient'
     const user = await User.create({ email, password: hash, role: 'patient' });
 
-    // Создаём пациента
+    // create patient and link with user
     const patient = await Patient.create({
       firstname,
       lastname,
@@ -36,7 +37,7 @@ exports.register = async (req, res) => {
       userid: user.userid
     });
 
-    // Генерируем токен
+    // generate jwt token
     const token = jwt.sign({ userid: user.userid, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     res.status(201).json({
@@ -50,21 +51,23 @@ exports.register = async (req, res) => {
   }
 };
 
-
+// logs in a user (admin, doctor, or patient)
 exports.login = async (req, res) => {
   const { email, password } = req.body;
   try {
-    console.log('Пытаемся найти пользователя:', email);
+    console.log('Looking for user:', email); // trying to find user in db
     const user = await User.findOne({ where: { email } });
 
     if (!user) {
-      console.log('Пользователь не найден в БД');
+      console.log('User not found'); // user not found
       return res.status(404).json({ message: 'User not found' });
     }
 
+    // check password match
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(401).json({ message: 'Invalid credentials' });
 
+    // generate jwt token
     const token = jwt.sign({ userid: user.userid, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     res.json({ token, user: { userid: user.userid, email: user.email, role: user.role } });
